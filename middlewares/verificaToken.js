@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const SEGREDO_JWT = 'segredo-token';
 
 module.exports = (req, res, next) => {
-    // Tenta pegar o token do Header OU da URL (query string)
+    // Tenta pegar do Header OU do parâmetro ?token=
     let token = req.headers['authorization'] || req.query.token;
 
     if (!token) return res.status(401).json({ erro: "Token não fornecido." });

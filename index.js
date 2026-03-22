@@ -28,57 +28,48 @@ app.use(registraLog);
 app.get('/', (req, res) => {
     res.send(`
         <html>
-            <head><title>API</title></head>
-            <body style="font-family: sans-serif; padding: 50px; background: #f4f4f9;">
-                <h1>Painel de Testes da API</h1>
-                <p>Status: <strong id="status">Aguardando comando...</strong></p>
-                
-                <button onclick="gerarToken()" style="padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px;">
-                    🔑 Gerar Token de Acesso
+            <head><title>API Backend - Painel</title></head>
+            <body style="font-family: sans-serif; padding: 40px; line-height: 1.6;">
+                <h1>🚀 API Express - Painel de Controle</h1>
+                <button onclick="gerarToken()" style="padding: 12px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 4px;">
+                    🔑 Autenticar e Liberar Rotas
                 </button>
 
-                <div id="links" style="margin-top: 20px; display: none; border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
-                    <h3>Rotas Liberadas:</h3>
+                <div id="secaoLinks" style="display: none; margin-top: 30px;">
+                    <h3>📂 Rotas Disponíveis (GET):</h3>
                     <ul>
-                        <li><a id="linkItens" target="_blank" style="color: blue; text-decoration: none;">📂 Listar Itens (JSON)</a></li>
-                        <li style="margin-top: 10px;"><a id="linkPdf" target="_blank" style="color: red; text-decoration: none;">📕 Baixar Lista em PDF</a></li>
+                        <li><a id="linkItens" target="_blank">Listar Todos os Itens</a></li>
+                        <li><a id="linkItemUnico" target="_blank">Buscar Item (Código 1)</a></li>
+                        <li><a id="linkLogs" target="_blank">Ver Logs de Hoje</a></li>
+                        <li><a id="linkPdf" target="_blank" style="color: red; font-weight: bold;">📥 Baixar PDF de Itens</a></li>
                     </ul>
-                    <hr>
-                    <p><strong>Seu Token Atual:</strong></p>
-                    <code id="tokenValue" style="word-break: break-all; background: #eee; padding: 5px; display: block;"></code>
+                    <p><strong>Token Gerado:</strong> <small id="tokenDisplay" style="color: #666;"></small></p>
                 </div>
 
                 <script>
                     async function gerarToken() {
-                        const statusElement = document.getElementById('status');
-                        statusElement.innerText = "Tentando logar...";
+                        const response = await fetch('/logar', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: "pessoa@email.com", senha: "123" })
+                        });
+                        const data = await response.json();
 
-                        try {
-                            const response = await fetch('/logar', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email: "pessoa@email.com", senha: "123" })
-                            });
+                        if (data.token) {
+                            const t = data.token;
+                            const hoje = new Date().toISOString().split('T')[0];
 
-                            const data = await response.json();
+                            // Atualiza os links injetando o token na URL
+                            document.getElementById('linkItens').href = '/itens?token=' + t;
+                            document.getElementById('linkItemUnico').href = '/itens/1?token=' + t;
+                            document.getElementById('linkLogs').href = '/logs/' + hoje + '?token=' + t;
+                            document.getElementById('linkPdf').href = '/download/itens?token=' + t;
 
-                            if (data.token) {
-                                statusElement.innerText = "✅ Logado com sucesso!";
-                                statusElement.style.color = "green";
-                                
-                                document.getElementById('tokenValue').innerText = data.token;
-                                document.getElementById('linkItens').href = '/itens?token=' + data.token;
-                                document.getElementById('linkPdf').href = '/download/itens?token=' + data.token;
-                                document.getElementById('links').style.display = 'block';
-                            } else {
-                                // Se cair aqui, é porque a API barrou (ex: final de semana)
-                                statusElement.innerText = "❌ Erro: " + (data.erro || "Falha desconhecida");
-                                statusElement.style.color = "red";
-                                alert("Erro da API: " + (data.erro || "Verifique o console"));
-                            }
-                        } catch (err) {
-                            statusElement.innerText = "❌ Erro de conexão com o servidor.";
-                            console.error(err);
+                            document.getElementById('tokenDisplay').innerText = t;
+                            document.getElementById('secaoLinks').style.display = 'block';
+                            alert("Sucesso! Rotas liberadas.");
+                        } else {
+                            alert("Erro ao logar: " + (data.erro || "Verifique o console"));
                         }
                     }
                 </script>
