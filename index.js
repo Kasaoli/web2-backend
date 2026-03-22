@@ -25,6 +25,48 @@ app.use(registraLog);
 
 // --- ROTAS ---
 
+app.get('/', (req, res) => {
+    res.send(`
+        <html>
+            <head><title>API do Aluno</title></head>
+            <body style="font-family: sans-serif; padding: 50px;">
+                <h1>Painel de Testes da API</h1>
+                <p>Use o botão abaixo para gerar um token e liberar os links:</p>
+                
+                <button onclick="gerarToken()" style="padding: 10px; cursor: pointer;">
+                    🔑 Gerar Token de Acesso
+                </button>
+
+                <div id="links" style="margin-top: 20px; display: none;">
+                    <h3>Rotas Liberadas:</h3>
+                    <ul>
+                        <li><a id="linkItens" target="_blank">Listar Itens (JSON)</a></li>
+                        <li><a id="linkPdf" target="_blank">Baixar Lista em PDF</a></li>
+                    </ul>
+                    <p><strong>Seu Token:</strong> <code id="tokenValue" style="word-break: break-all;"></code></p>
+                </div>
+
+                <script>
+                    async function gerarToken() {
+                        const response = await fetch('/logar', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: "aluno@ifce.edu.br", senha: "123" })
+                        });
+                        const data = await response.json();
+                        const token = data.token;
+
+                        document.getElementById('tokenValue').innerText = token;
+                        document.getElementById('linkItens').href = '/itens?token=' + token;
+                        document.getElementById('linkPdf').href = '/download/itens?token=' + token;
+                        document.getElementById('links').style.display = 'block';
+                    }
+                </script>
+            </body>
+        </html>
+    `);
+});
+
 app.post('/logar', (req, res) => {
     const { email, senha } = req.body;
     const usuarioValido = usuarios.find(u => u.email === email && u.senha === senha);
