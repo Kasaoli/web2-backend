@@ -13,7 +13,7 @@ app.use(express.json());
 const SEGREDO_JWT = 'segredo-token';
 
 // --- DADOS MOCKADOS ---
-let usuarios = [{ email: "aluno@ifce.edu.br", senha: "123" }];
+let usuarios = [{ email: "pessoa@email.com", senha: "123" }];
 let itens = [
     { codigo: 1, nome: "Notebook", preco: 3500 },
     { codigo: 2, nome: "Mouse", preco: 150 }
