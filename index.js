@@ -79,6 +79,11 @@ app.delete('/itens/:codigo', verificaToken, (req, res) => {
 });
 
 // --- INICIALIZANDO O SERVIDOR ---
-app.listen(3000, () => {
-    console.log('Servidor rodando na porta 3000');
-});
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = 3000;
+    app.listen(PORT, () => {
+        console.log(`Servidor local rodando em http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
