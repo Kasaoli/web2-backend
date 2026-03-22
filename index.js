@@ -28,7 +28,7 @@ app.use(registraLog);
 app.get('/', (req, res) => {
     res.send(`
         <html>
-            <head><title>API do Aluno</title></head>
+            <head><title>API</title></head>
             <body style="font-family: sans-serif; padding: 50px; background: #f4f4f9;">
                 <h1>Painel de Testes da API</h1>
                 <p>Status: <strong id="status">Aguardando comando...</strong></p>
@@ -57,7 +57,7 @@ app.get('/', (req, res) => {
                             const response = await fetch('/logar', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ email: "aluno@ifce.edu.br", senha: "123" })
+                                body: JSON.stringify({ email: "pessoa@email.com", senha: "123" })
                             });
 
                             const data = await response.json();
