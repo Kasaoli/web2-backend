@@ -29,37 +29,57 @@ app.get('/', (req, res) => {
     res.send(`
         <html>
             <head><title>API do Aluno</title></head>
-            <body style="font-family: sans-serif; padding: 50px;">
+            <body style="font-family: sans-serif; padding: 50px; background: #f4f4f9;">
                 <h1>Painel de Testes da API</h1>
-                <p>Use o botão abaixo para gerar um token e liberar os links:</p>
+                <p>Status: <strong id="status">Aguardando comando...</strong></p>
                 
-                <button onclick="gerarToken()" style="padding: 10px; cursor: pointer;">
+                <button onclick="gerarToken()" style="padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px;">
                     🔑 Gerar Token de Acesso
                 </button>
 
-                <div id="links" style="margin-top: 20px; display: none;">
+                <div id="links" style="margin-top: 20px; display: none; border: 1px solid #ccc; padding: 15px; border-radius: 5px;">
                     <h3>Rotas Liberadas:</h3>
                     <ul>
-                        <li><a id="linkItens" target="_blank">Listar Itens (JSON)</a></li>
-                        <li><a id="linkPdf" target="_blank">Baixar Lista em PDF</a></li>
+                        <li><a id="linkItens" target="_blank" style="color: blue; text-decoration: none;">📂 Listar Itens (JSON)</a></li>
+                        <li style="margin-top: 10px;"><a id="linkPdf" target="_blank" style="color: red; text-decoration: none;">📕 Baixar Lista em PDF</a></li>
                     </ul>
-                    <p><strong>Seu Token:</strong> <code id="tokenValue" style="word-break: break-all;"></code></p>
+                    <hr>
+                    <p><strong>Seu Token Atual:</strong></p>
+                    <code id="tokenValue" style="word-break: break-all; background: #eee; padding: 5px; display: block;"></code>
                 </div>
 
                 <script>
                     async function gerarToken() {
-                        const response = await fetch('/logar', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: "aluno@ifce.edu.br", senha: "123" })
-                        });
-                        const data = await response.json();
-                        const token = data.token;
+                        const statusElement = document.getElementById('status');
+                        statusElement.innerText = "Tentando logar...";
 
-                        document.getElementById('tokenValue').innerText = token;
-                        document.getElementById('linkItens').href = '/itens?token=' + token;
-                        document.getElementById('linkPdf').href = '/download/itens?token=' + token;
-                        document.getElementById('links').style.display = 'block';
+                        try {
+                            const response = await fetch('/logar', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: "aluno@ifce.edu.br", senha: "123" })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.token) {
+                                statusElement.innerText = "✅ Logado com sucesso!";
+                                statusElement.style.color = "green";
+                                
+                                document.getElementById('tokenValue').innerText = data.token;
+                                document.getElementById('linkItens').href = '/itens?token=' + data.token;
+                                document.getElementById('linkPdf').href = '/download/itens?token=' + data.token;
+                                document.getElementById('links').style.display = 'block';
+                            } else {
+                                // Se cair aqui, é porque a API barrou (ex: final de semana)
+                                statusElement.innerText = "❌ Erro: " + (data.erro || "Falha desconhecida");
+                                statusElement.style.color = "red";
+                                alert("Erro da API: " + (data.erro || "Verifique o console"));
+                            }
+                        } catch (err) {
+                            statusElement.innerText = "❌ Erro de conexão com o servidor.";
+                            console.error(err);
+                        }
                     }
                 </script>
             </body>
